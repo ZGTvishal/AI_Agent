@@ -20,7 +20,7 @@ parser = PydanticOutputParser(pydantic_object=ResearchResponse)
 llm = ChatGoogleGenerativeAI(
     model="gemma-4-31b-it",
     google_api_key=os.getenv("GEMMA_API_KEY"),
-    temperature=1.0,
+    temperature=1.0
 )
 
 tools = [search_tool, wiki_tool, save_tool]
@@ -44,10 +44,23 @@ raw_response = agent.invoke({
     "messages": [HumanMessage(content=query)]
 })
 
+#raw_response = agent.invoke({"messages": [{"role": "user", "content": query}]})
+
 try:
-    output_text = raw_response["messages"][-1].content
+    output = raw_response["messages"][-1].content
+    if isinstance(output, list):
+        output_text = " ".join(
+            block["text"] if isinstance(block, dict) else block
+            for block in output
+            if (isinstance(block, dict) and "text" in block) or isinstance(block, str)
+        )
+    else:
+        output_text = output
     structured_response = parser.parse(output_text)
-    print(structured_response)
+    #print(structured_response)
+
+    from tools import save_to_txt
+    save_to_txt(structured_response)
 except Exception as e:
     print("Error parsing response:", e)
     print("Raw Response:", raw_response)

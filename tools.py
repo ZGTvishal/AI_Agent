@@ -1,4 +1,5 @@
-from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
+from langchain_community.tools import WikipediaQueryRun
+from ddgs import DDGS 
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_core.tools import Tool
 import uuid
@@ -14,6 +15,11 @@ def save_to_txt(data: str, filename:str = "research_output.txt"):
     
     return f"Data Successfully saved to {filename}"
 
+def ddg_search(query: str) -> str:
+    with DDGS() as ddgs:
+        results = ddgs.text(query, max_results=3)
+        return "\n".join([r["body"] for r in results])
+
 
 save_tool = Tool(
     name="Save_txt_to_file",
@@ -21,10 +27,10 @@ save_tool = Tool(
     description="Saves the research data to a custom file",
 )
 
-search = DuckDuckGoSearchRun()
+# search = DuckDuckGoSearchRun()
 search_tool = Tool(
     name="search",
-    func=search.run,
+    func=ddg_search,
     description="Search the web for information",
 )
 
