@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
-from tools import search_tool, wiki_tool, save_tool
+from tools import search_tool, wiki_tool, save_tool, google_tool, save_to_txt
 
 load_dotenv()
 
@@ -23,11 +23,11 @@ llm = ChatGoogleGenerativeAI(
     temperature=1.0
 )
 
-tools = [search_tool, wiki_tool, save_tool]
+tools = [search_tool, wiki_tool, save_tool, google_tool]
 
 system_prompt = f"""
 You are a research assistant that will help generate a research paper.
-Answer the user query and use necessary tools.
+Answer the user query and use necessary tools. Review atleast 10 reseach papers on the topic.
 Wrap the final output in this format and provide no other text:
 {parser.get_format_instructions()}
 """
@@ -35,8 +35,9 @@ Wrap the final output in this format and provide no other text:
 agent = create_react_agent(
     model=llm,
     tools=tools,
-    prompt=system_prompt,
+    state_modifier=system_prompt,
 )
+
 
 query = input("What can I help you research? ")
 
@@ -44,7 +45,6 @@ raw_response = agent.invoke({
     "messages": [HumanMessage(content=query)]
 })
 
-#raw_response = agent.invoke({"messages": [{"role": "user", "content": query}]})
 
 try:
     output = raw_response["messages"][-1].content
@@ -57,10 +57,8 @@ try:
     else:
         output_text = output
     structured_response = parser.parse(output_text)
-    #print(structured_response)
-
-    from tools import save_to_txt
     save_to_txt(structured_response)
+    print(f"Research saved to the research.txt file")
 except Exception as e:
     print("Error parsing response:", e)
     print("Raw Response:", raw_response)
