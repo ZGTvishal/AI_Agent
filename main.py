@@ -5,7 +5,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
-from tools import search_tool, wiki_tool, save_tool, google_tool, save_to_txt
+from tools import search_tool, wiki_tool, save_tool, google_tool, save_to_txt, arxiv_tool
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ llm = ChatGoogleGenerativeAI(
     temperature=1.0
 )
 
-tools = [search_tool, wiki_tool, save_tool, google_tool]
+tools = [search_tool, wiki_tool, save_tool, google_tool,arxiv_tool]
 
 system_prompt = f"""
 You are a research assistant that will help generate a research paper.

@@ -1,4 +1,4 @@
-# AI Research Agent
+# Research Agent
 
 A learning project for building a basic AI Agent using LangChain and LangGraph.
 The agent helps with research tasks by searching the web, querying Wikipedia,

@@ -7,6 +7,12 @@ from langchain_core.tools import Tool
 from langchain_core.tools import BaseTool
 import uuid
 from datetime import datetime
+from langchain_community.retrievers import ArxivRetriever
+
+retriever = ArxivRetriever(
+    load_max_docs=10,
+    get_full_documents=True,
+)
 
 
 def save_to_txt(data: str, filename:str = "research_output.txt"):
@@ -41,6 +47,9 @@ def google_scholar_search(query: str) -> str:
         return "\n---\n".join(results) if results else "No results found"
     except Exception as e:
         return f"Google Scholar search failed: {str(e)}"
+    
+def arxiv_search(query: str) -> str:
+    retriever.invoke(query)
 
 
 
@@ -64,6 +73,11 @@ search_tool = Tool(
     description="Search the web for information",
 )
 
+arxiv_tool = Tool(
+    name = "arxiv_search",
+    func=arxiv_search,
+    description="search arxiv database and retrive 10 papers on the related topic"
+)
 
 api_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=100)
 wiki_tool = WikipediaQueryRun(api_wrapper = api_wrapper)
